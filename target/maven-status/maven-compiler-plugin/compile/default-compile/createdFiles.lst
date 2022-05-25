@@ -1,0 +1,7 @@
+rs\ac\bg\fon\njt\groupTraning\model\Trainer.class
+rs\ac\bg\fon\njt\groupTraning\model\User.class
+rs\ac\bg\fon\njt\groupTraning\GroupTraningApplication.class
+rs\ac\bg\fon\njt\groupTraning\repository\UserRepository.class
+rs\ac\bg\fon\njt\groupTraning\controller\UserController.class
+rs\ac\bg\fon\njt\groupTraning\service\UserService.class
+rs\ac\bg\fon\njt\groupTraning\repository\TrainerRepository.class
