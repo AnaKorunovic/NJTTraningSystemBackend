@@ -11,7 +11,7 @@ import rs.ac.bg.fon.njt.groupTraning.repository.GroupRepository;
 @Service
 public class GroupService {
     
-    @Autowired
+   
     private final GroupRepository groupRepository;
 
     @Autowired
@@ -20,11 +20,16 @@ public class GroupService {
     }
 
     public Group loadGroupById(Long id) throws Exception {
+        System.out.println("group id "+id);
         Optional<Group> optionalGroup = groupRepository.findById(id);
-        if (optionalGroup.isEmpty()) throw new Exception("Group with id = " + id + "does not exist");
+        System.out.println("group fonudend "+optionalGroup.get());
+        if (!optionalGroup.isPresent()) throw new Exception("Group with id = " + id + "does not exist");
         return optionalGroup.get();
     }
 
+     public Group loadGroupByName(String name){
+        return this.groupRepository.findByName(name);
+    }
     public List<Group> loadGroups() {
         return groupRepository.findAll();
     }
@@ -39,7 +44,7 @@ public class GroupService {
    // @Transactional
     public Group updateGroup(Long id, Group toUpdate) throws Exception {
         Optional<Group> optionalGroup= groupRepository.findById(id);
-        if (optionalGroup.isEmpty())
+        if (!optionalGroup.isPresent())
             throw new Exception("Cannot update group. group with id = " + id + "does not exist");
         toUpdate.setId(id);
 //        ovo smemo da uradimo jer je jwt token vec proveren od strane Spring Security
@@ -50,7 +55,7 @@ public class GroupService {
    @Transactional
     public Group deleteGroupById(Long id) throws Exception {
         Optional<Group> optionalGroup = groupRepository.findById(id);
-        if (optionalGroup.isEmpty())
+        if (!optionalGroup.isPresent())
             throw new Exception("Cannot delete group. Group with id = " + id + "does not exist");
         groupRepository.deleteById(id);
         return optionalGroup.get();

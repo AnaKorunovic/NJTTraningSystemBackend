@@ -22,7 +22,6 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode
 @ToString
-@AllArgsConstructor
 public class Group {
     
     @Id
@@ -31,11 +30,23 @@ public class Group {
     
     private String name;
     
-    @ManyToOne
-    @JoinColumn(name = "trainer")
-    private Trainer trainer;
+//    @ManyToOne
+//    @JoinColumn(name = "trainer")
+    private Long trainer;
    
-    @ManyToOne
-    @JoinColumn(name = "user")
-    private User user;
+//    @ManyToOne
+//    @JoinColumn(name = "user")
+//    private User user;
+    private Long user;
+
+    public Group( String name, Long trainer, Long user) {
+        this.id = id;
+        this.name = name;
+        this.trainer = trainer;
+        this.user = user;
+    }
+
+    
+    
+    
 }

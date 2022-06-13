@@ -11,7 +11,6 @@ import rs.ac.bg.fon.njt.groupTraning.repository.TrainerRepository;
 @Service
 public class TrainerService {
     
-    @Autowired
     private final TrainerRepository trainerRepository;
 
     @Autowired
@@ -21,8 +20,16 @@ public class TrainerService {
 
     public Trainer loadTrainerById(Long id) throws Exception {
         Optional<Trainer> optionalTrainer = trainerRepository.findById(id);
-        if (optionalTrainer.isEmpty()) throw new Exception("Trainer with id = " + id + "does not exist");
+        if (!optionalTrainer.isPresent()) throw new Exception("Trainer with id = " + id + "does not exist");
         return optionalTrainer.get();
+    }
+    
+    public Trainer loadTrainerByName(String name){
+        return this.trainerRepository.findByName(name);
+    }
+    
+     public Trainer loadTrainerByEmailAndNumber(String email,String number){
+        return this.trainerRepository.findByEmailAndNumber(email, number);
     }
 
     public List<Trainer> loadTrainers() {
@@ -38,7 +45,7 @@ public class TrainerService {
     @Transactional
     public Trainer updateTrainer(Long id, Trainer toUpdate) throws Exception {
         Optional<Trainer> optionalTrainer= trainerRepository.findById(id);
-        if (optionalTrainer.isEmpty())
+        if (!optionalTrainer.isPresent())
             throw new Exception("Cannot update trainer. Trainer with id = " + id + "does not exist");
         toUpdate.setId(id);
 //        ovo smemo da uradimo jer je jwt token vec proveren od strane Spring Security
@@ -49,7 +56,7 @@ public class TrainerService {
    @Transactional
     public Trainer deleteTrainerById(Long id) throws Exception {
         Optional<Trainer> optionalTrainer = trainerRepository.findById(id);
-        if (optionalTrainer.isEmpty())
+        if (!optionalTrainer.isPresent())
             throw new Exception("Cannot delete trainer. Trainer with id = " + id + "does not exist");
         trainerRepository.deleteById(id);
         return optionalTrainer.get();

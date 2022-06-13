@@ -6,4 +6,6 @@ import rs.ac.bg.fon.njt.groupTraning.model.Group;
 
 public interface GroupRepository extends JpaRepository<Group, Long>  {
     
+    Group findByName(String name);
+    
 }

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 import rs.ac.bg.fon.njt.groupTraning.model.Trainer;
 
 public interface TrainerRepository extends JpaRepository<Trainer, Long> {
-    
+    Trainer findByName(String name);
+    Trainer findByEmailAndNumber(String email,String number);
     
 }

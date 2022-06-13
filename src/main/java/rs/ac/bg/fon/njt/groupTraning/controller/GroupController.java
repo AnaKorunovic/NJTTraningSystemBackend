@@ -1,27 +1,39 @@
 package rs.ac.bg.fon.njt.groupTraning.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import rs.ac.bg.fon.njt.groupTraning.dto.GroupDto;
 import rs.ac.bg.fon.njt.groupTraning.model.Group;
+import rs.ac.bg.fon.njt.groupTraning.model.User;
+import rs.ac.bg.fon.njt.groupTraning.model.Trainer;
 import rs.ac.bg.fon.njt.groupTraning.service.GroupService;
+import rs.ac.bg.fon.njt.groupTraning.service.TrainerService;
+import rs.ac.bg.fon.njt.groupTraning.service.UserService;
 
 @RestController
-@RequestMapping("/groups")
+@RequestMapping("/api/groups")
+@CrossOrigin(origins = "*")
 public class GroupController {
 
-    @Autowired
+    
     private final GroupService groupService;
+    private final TrainerService trainerService;
+    private final UserService userService;
 
     @Autowired
-    public GroupController(GroupService groupService) {
+    public GroupController(GroupService groupService,TrainerService trainerService,UserService userService) {
         this.groupService = groupService;
+        this.trainerService=trainerService;
+        this.userService=userService;
     }
 
     @RequestMapping("/{id}")
@@ -37,30 +49,55 @@ public class GroupController {
     }
 
     @RequestMapping()
-    public ResponseEntity<List<Group>> getAllgroups() {
-        return ResponseEntity.ok(groupService.loadGroups());
+    public ResponseEntity<List<GroupDto>> getAllgroups() {
+        List<Group> groups = groupService.loadGroups();
+        
+        List<GroupDto> groupDtos = new ArrayList<>();
+        User user = null;
+        Trainer trainer=null;
+        for (Group g:groups) {
+            try {
+                user = userService.loadUserById(g.getUser());
+                trainer=trainerService.loadTrainerById(g.getTrainer());
+                if (user != null || trainer!=null) {
+                    groupDtos.add(new GroupDto(g.getId(), g.getName(), trainer, user.getUsername()));
+                    
+                }
+            } catch (Exception ex) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            }
+        }
+        return ResponseEntity.ok(groupDtos);
     }
 
-    /*
-    @GetMapping("/event/{event}")
-    public ResponseEntity<List<Performer>> getAllPerformersOfEvent(@PathVariable("event") Long eventId){
-        List<Performance> performances = performanceService.getAllPerformancesOfEvent(eventId);
-        List<Performer> result = performances.stream().map(Performance::getPerformer).collect(Collectors.toList());
-        return ResponseEntity.ok(result);
-    }*/
-
     @RequestMapping(method = RequestMethod.POST, value = "/add")
-    public Group addGroup(@RequestBody Group toAdd) {
-        return groupService.addGroup(toAdd);
+    public ResponseEntity<Group> addGroup(@RequestBody Group toAdd) {
+        Group groupDB = this.groupService.loadGroupByName(toAdd.getName());
+        if (groupDB == null) {
+            return new ResponseEntity<>(groupService.addGroup(toAdd), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/{id}")
     public ResponseEntity<?> updateGroup(@PathVariable Long id,
             @RequestBody Group toUpdate) {
         try {
-            Group g = groupService.updateGroup(id, toUpdate);
-            System.out.println("Group " + g.getName() + " updated");
-            return ResponseEntity.ok(g);
+            Group groupDB = groupService.loadGroupById(id);
+            Trainer trainer=trainerService.loadTrainerById(toUpdate.getTrainer());
+            if (groupDB != null) {
+                groupDB.setName(toUpdate.getName());
+                groupDB.setTrainer(trainer.getId());
+               
+
+                Group g= groupService.updateGroup(id, groupDB);
+                System.out.println("Group " + g.getName() +" updated");
+                return ResponseEntity.ok(g);
+
+            } else {
+                return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
+            }
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
